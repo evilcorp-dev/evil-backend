@@ -8,12 +8,12 @@ app.use(express.json());
 
 const LOG_FILE = './ips.json';
 
-// AQUI TU COLA OS IPS QUE NÃO DEVEM SER SALVOS (SEUS E DO OUTRO ADMIN)
-// Se não souber teu IP, entra no site: meuip.com.br, pega e cola aqui.
-// Pode colocar quantos quiser.
+// COLOQUE OS TEUS IPS AQUI EMBAIXO (E DO ASHFORD TAMBÉM)
+// Se não souber, abra meuip.com.br
 const IP_BLACKLIST = [
-    "SEU_IP_AQUI",       // Cola teu IP aqui
-    "IP_DO_ASHFORD_AQUI" // Cola o IP do ASHFORD aqui
+    "127.0.0.1",       // Localhost (testes)
+    "177.0.0.0",       // EXEMPLO - troque pelo teu IP
+    "177.0.0.1"        // EXEMPLO - troque pelo do ASHFORD
 ];
 
 function getLogs() {
@@ -23,7 +23,7 @@ function getLogs() {
 }
 
 function saveLog(ip, userAgent) {
-    // Se o IP estiver na blacklist, nem salva
+    // Se o IP tiver na blacklist, ele simplesmente dá return e nao salva
     if (IP_BLACKLIST.includes(ip)) return;
 
     const logs = getLogs();
@@ -47,6 +47,14 @@ app.post('/api/log-ip', (req, res) => {
 
 app.get('/api/logs', (req, res) => {
     res.json(getLogs());
+});
+
+// ROTA SECRETA PRA APAGAR OS LOGS
+app.get('/api/clear-logs', (req, res) => {
+    if (fs.existsSync(LOG_FILE)) {
+        fs.unlinkSync(LOG_FILE);
+    }
+    res.json({ success: true, message: "Logs apagados com sucesso." });
 });
 
 const PORT = process.env.PORT || 3000;
