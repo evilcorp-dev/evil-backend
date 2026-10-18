@@ -9,11 +9,11 @@ app.use(express.json());
 const LOG_FILE = './ips.json';
 
 // COLOQUE OS TEUS IPS AQUI EMBAIXO (E DO ASHFORD TAMBÉM)
-// Se não souber, abra meuip.com.br
+// Se não souber o teu, abre o site meuip.com.br e copia.
 const IP_BLACKLIST = [
-    "127.0.0.1",       // Localhost (testes)
-    "177.0.0.0",       // EXEMPLO - troque pelo teu IP
-    "177.0.0.1"        // EXEMPLO - troque pelo do ASHFORD
+    "127.0.0.1",       // Localhost (não apaga essa)
+    "COLOQUE_TEU_IP_AQUI", // Ex: "177.12.34.56"
+    "COLOQUE_IP_ASHFORD_AQUI" // Ex: "177.98.76.54"
 ];
 
 function getLogs() {
@@ -23,11 +23,12 @@ function getLogs() {
 }
 
 function saveLog(ip, userAgent) {
-    // Se o IP tiver na blacklist, ele simplesmente dá return e nao salva
+    // Se o IP tiver na blacklist, ele ignora e não salva
     if (IP_BLACKLIST.includes(ip)) return;
 
     const logs = getLogs();
     const lastLog = logs[logs.length - 1];
+    // Evita salvar o mesmo IP repetidamente no mesmo minuto
     if (lastLog && lastLog.ip === ip && (Date.now() - lastLog.timestamp < 60000)) return;
 
     logs.push({
