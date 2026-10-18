@@ -8,6 +8,14 @@ app.use(express.json());
 
 const LOG_FILE = './ips.json';
 
+// AQUI TU COLA OS IPS QUE NÃO DEVEM SER SALVOS (SEUS E DO OUTRO ADMIN)
+// Se não souber teu IP, entra no site: meuip.com.br, pega e cola aqui.
+// Pode colocar quantos quiser.
+const IP_BLACKLIST = [
+    "SEU_IP_AQUI",       // Cola teu IP aqui
+    "IP_DO_ASHFORD_AQUI" // Cola o IP do ASHFORD aqui
+];
+
 function getLogs() {
     if (!fs.existsSync(LOG_FILE)) return [];
     const data = fs.readFileSync(LOG_FILE);
@@ -15,6 +23,9 @@ function getLogs() {
 }
 
 function saveLog(ip, userAgent) {
+    // Se o IP estiver na blacklist, nem salva
+    if (IP_BLACKLIST.includes(ip)) return;
+
     const logs = getLogs();
     const lastLog = logs[logs.length - 1];
     if (lastLog && lastLog.ip === ip && (Date.now() - lastLog.timestamp < 60000)) return;
