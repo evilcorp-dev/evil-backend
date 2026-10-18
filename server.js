@@ -8,12 +8,11 @@ app.use(express.json());
 
 const LOG_FILE = './ips.json';
 
-// COLOQUE OS TEUS IPS AQUI EMBAIXO (E DO ASHFORD TAMBÉM)
-// Se não souber o teu, abre o site meuip.com.br e copia.
+// BLACKLIST DE IPS
+// O IP do Rnzzk está bloqueado. O do ASHFORD vai ser salvo normal.
 const IP_BLACKLIST = [
-    "127.0.0.1",       // Localhost (não apaga essa)
-    "COLOQUE_TEU_IP_AQUI", // Ex: "177.12.34.56"
-    "COLOQUE_IP_ASHFORD_AQUI" // Ex: "177.98.76.54"
+    "127.0.0.1",         // Localhost
+    "189.63.226.218"     // IP do Rnzzk (Admin)
 ];
 
 function getLogs() {
@@ -40,9 +39,14 @@ function saveLog(ip, userAgent) {
 }
 
 app.post('/api/log-ip', (req, res) => {
+    // Pega o IP real, considerando o Cloudflare/Render proxy
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const userAgent = req.headers['user-agent'] || 'Desconhecido';
-    saveLog(ip, userAgent);
+    
+    // O x-forwarded-for pode vir com uma lista de IPs, pegamos o primeiro
+    const realIp = ip.split(',')[0].trim();
+
+    saveLog(realIp, userAgent);
     res.json({ success: true });
 });
 
@@ -50,7 +54,7 @@ app.get('/api/logs', (req, res) => {
     res.json(getLogs());
 });
 
-// ROTA SECRETA PRA APAGAR OS LOGS
+// ROTA SECRETA PRA APAGAR OS LOGS (Acesse no navegador: seu-link.onrender.com/api/clear-logs)
 app.get('/api/clear-logs', (req, res) => {
     if (fs.existsSync(LOG_FILE)) {
         fs.unlinkSync(LOG_FILE);
